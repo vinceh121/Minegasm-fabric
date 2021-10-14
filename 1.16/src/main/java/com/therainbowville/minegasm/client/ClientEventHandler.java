@@ -11,6 +11,8 @@ import com.mojang.authlib.GameProfile;
 import com.therainbowville.minegasm.config.GameplayMode;
 import com.therainbowville.minegasm.config.MinegasmConfig;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -214,37 +216,33 @@ public class ClientEventHandler {
 			ToyController.setVibrationLevel(0);
 		}
 	}
+
+	public static void onHarvest(PlayerEntity player, BlockState blockState, boolean canHarvest) {
+		GameProfile profile = player.getGameProfile();
+
+		if (profile.getId().equals(playerID)) {
+			Block block = blockState.getBlock();
+
+			// ToolType. AXE, HOE, PICKAXE, SHOVEL
+
+			float blockHardness = block.getDefaultState().getHardness(null, null);
+//			LOGGER.debug("Harvest: tool: "
+//					+ block.getHarvestTool(blockState)
+//					+ " can harvest? "
+//					+ event.canHarvest()
+//					+ " hardness: "
+//					+ blockHardness);
+
+			int intensity
+					= Math.toIntExact(Math.round((getIntensity("harvest") / 100.0 * (blockHardness / 50.0)) * 100));
+
+			if (canHarvest) {
+				setState(getStateCounter(), 1, intensity, false);
+			}
+		}
+	}
+
 	/*
-	 * @SubscribeEvent
-	 * public static void onHarvest(PlayerEvent.HarvestCheck event) {
-	 * PlayerEntity player = event.getPlayer();
-	 * GameProfile profile = player.getGameProfile();
-	 * 
-	 * if (profile.getId().equals(playerID)) {
-	 * BlockState blockState = event.getTargetBlock();
-	 * Block block = blockState.getBlock();
-	 * 
-	 * // ToolType. AXE, HOE, PICKAXE, SHOVEL
-	 * 
-	 * @SuppressWarnings("ConstantConditions")
-	 * float blockHardness = block.defaultBlockState().getDestroySpeed(null, null);
-	 * LOGGER.debug("Harvest: tool: "
-	 * + block.getHarvestTool(blockState)
-	 * + " can harvest? "
-	 * + event.canHarvest()
-	 * + " hardness: "
-	 * + blockHardness);
-	 * 
-	 * int intensity
-	 * = Math.toIntExact(Math.round((getIntensity("harvest") / 100.0 *
-	 * (blockHardness / 50.0)) * 100));
-	 * 
-	 * if (event.canHarvest()) {
-	 * setState(getStateCounter(), 1, intensity, false);
-	 * }
-	 * }
-	 * }
-	 * 
 	 * @SubscribeEvent
 	 * public static void onBreak(BlockEvent.BreakEvent event) {
 	 * PlayerEntity player = event.getPlayer();
