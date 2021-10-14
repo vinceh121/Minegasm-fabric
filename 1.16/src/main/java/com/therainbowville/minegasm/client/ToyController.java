@@ -25,9 +25,9 @@ public class ToyController {
 		try {
 			device = null;
 			client.Disconnect();
-			LOGGER.info("URL: " + MinegasmConfig.serverUrl);
+			LOGGER.info("URL: " + MinegasmConfig.INSTANCE.serverUrl);
 
-			client.Connect(new URI(MinegasmConfig.serverUrl), true);
+			client.Connect(new URI(MinegasmConfig.INSTANCE.serverUrl), true);
 			client.startScanning();
 
 			Thread.sleep(5000);
@@ -85,7 +85,7 @@ public class ToyController {
 		if (Objects.isNull(device))
 			return;
 
-		if (MinegasmConfig.vibrate) {
+		if (MinegasmConfig.INSTANCE.vibrate) {
 			try {
 				client.sendDeviceMessage(device, new SingleMotorVibrateCmd(device.getIndex(), level, client.getNextMsgId()));
 				currentVibrationLevel = level;

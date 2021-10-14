@@ -17,7 +17,7 @@
     "main" : [ "com.therainbowville.minegasm.common.Minegasm" ],
     "client" : [ ],
     "server" : [ ],
-    "modmenu": [ "com.therainboxville.minegasm.config.MinegasmConfig" ]
+    "modmenu": [ "com.therainbowville.minegasm.config.MinegasmModMenu" ]
   },
   "mixins" : [ "minegasm.mixins.json" ],
   "depends" : {

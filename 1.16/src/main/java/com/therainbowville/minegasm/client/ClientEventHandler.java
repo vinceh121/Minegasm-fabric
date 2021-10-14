@@ -103,18 +103,18 @@ public class ClientEventHandler {
 		hedonist.put("vitality", 10);
 
 		Map<String, Integer> custom = new HashMap<>();
-		custom.put("attack", MinegasmConfig.attackIntensity);
-		custom.put("hurt", MinegasmConfig.hurtIntensity);
-		custom.put("mine", MinegasmConfig.mineIntensity);
-		custom.put("xpChange", MinegasmConfig.xpChangeIntensity);
-		custom.put("harvest", MinegasmConfig.harvestIntensity);
-		custom.put("vitality", MinegasmConfig.vitalityIntensity);
+		custom.put("attack", MinegasmConfig.INSTANCE.attackIntensity);
+		custom.put("hurt", MinegasmConfig.INSTANCE.hurtIntensity);
+		custom.put("mine", MinegasmConfig.INSTANCE.mineIntensity);
+		custom.put("xpChange", MinegasmConfig.INSTANCE.xpChangeIntensity);
+		custom.put("harvest", MinegasmConfig.INSTANCE.harvestIntensity);
+		custom.put("vitality", MinegasmConfig.INSTANCE.vitalityIntensity);
 
-		if (GameplayMode.MASOCHIST.equals(MinegasmConfig.mode)) {
+		if (GameplayMode.MASOCHIST.equals(MinegasmConfig.INSTANCE.mode)) {
 			return masochist.get(type);
-		} else if (GameplayMode.HEDONIST.equals(MinegasmConfig.mode)) {
+		} else if (GameplayMode.HEDONIST.equals(MinegasmConfig.INSTANCE.mode)) {
 			return hedonist.get(type);
-		} else if (GameplayMode.CUSTOM.equals(MinegasmConfig.mode)) {
+		} else if (GameplayMode.CUSTOM.equals(MinegasmConfig.INSTANCE.mode)) {
 			return custom.get(type);
 		} else {
 			return normal.get(type);
@@ -152,7 +152,7 @@ public class ClientEventHandler {
 			if (profile.getId().equals(playerID)) {
 				int stateCounter = getStateCounter();
 
-				if (GameplayMode.MASOCHIST.equals(MinegasmConfig.mode)) {
+				if (GameplayMode.MASOCHIST.equals(MinegasmConfig.INSTANCE.mode)) {
 					if (playerHealth > 0 && playerHealth <= 1) {
 						setState(stateCounter, getIntensity("vitality"));
 					}
