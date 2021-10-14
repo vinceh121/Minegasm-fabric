@@ -207,20 +207,14 @@ public class ClientEventHandler {
 		populatePlayerInfo();
 	}
 
+	public static void onDeath(PlayerEntity player) {
+		GameProfile profile = player.getGameProfile();
+
+		if (profile.getId().equals(playerID)) {
+			ToyController.setVibrationLevel(0);
+		}
+	}
 	/*
-	 * @SubscribeEvent
-	 * public static void onDeath(LivingDeathEvent event) {
-	 * Entity entity = event.getEntityLiving();
-	 * if (entity instanceof PlayerEntity) {
-	 * PlayerEntity player = (PlayerEntity) entity;
-	 * GameProfile profile = player.getGameProfile();
-	 * 
-	 * if (profile.getId().equals(playerID)) {
-	 * ToyController.setVibrationLevel(0);
-	 * }
-	 * }
-	 * }
-	 * 
 	 * @SubscribeEvent
 	 * public static void onHarvest(PlayerEvent.HarvestCheck event) {
 	 * PlayerEntity player = event.getPlayer();
