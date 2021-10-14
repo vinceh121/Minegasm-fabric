@@ -1,0 +1,11 @@
+{
+  "required" : true,
+  "package" : "me.vinceh121.minegasm.mixin",
+  "compatibilityLevel" : "JAVA_16",
+  "mixins" : [ ],
+  "client" : [ "PlayerEntityMixins", "MinecraftClientMixins", "ClientWorldMixins" ],
+  "server" : [ ],
+  "injectors" : {
+    "defaultRequire" : 1
+  }
+}

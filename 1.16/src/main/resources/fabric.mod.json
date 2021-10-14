@@ -1,0 +1,26 @@
+{
+  "schemaVersion" : 1,
+  "id" : "minegasm",
+  "version" : "${version}",
+  "name" : "Minegasm",
+  "description" : "minegasm-fabric = Fabric + teledildonics",
+  "authors" : [ "RainbowVille", "vinceh121" ],
+  "contributors" : [ ],
+  "contact" : {
+    "homepage" : "https://github.com/vinceh121/minegasm-fabric",
+    "sources" : "https://github.com/vinceh121/minegasm-fabric"
+  },
+  "license" : "AGPL-3.0",
+  "icon" : "assets/minegasm/icon.png",
+  "environment" : "*",
+  "entrypoints" : {
+    "main" : [ "com.therainbowville.minegasm.common.Minegasm" ],
+    "client" : [ ],
+    "server" : [ ],
+    "modmenu": [ "com.therainboxville.minegasm.config.MinegasmConfig" ]
+  },
+  "mixins" : [ "minegasm.mixins.json" ],
+  "depends" : {
+    "fabricloader" : ">=0.11.7"
+  }
+}

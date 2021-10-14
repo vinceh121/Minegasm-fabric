@@ -1,47 +1,28 @@
 package com.therainbowville.minegasm.common;
 
-import com.therainbowville.minegasm.config.ConfigHolder;
-import com.therainbowville.minegasm.config.ConfigScreen;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ExtensionPoint;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.network.FMLNetworkConstants;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod(Minegasm.MOD_ID)
-public class Minegasm
-{
-    public static final String MOD_ID = "minegasm";
-    public static final String NAME = "Minegasm";
-    private static final Logger LOGGER = LogManager.getLogger();
+import com.therainbowville.minegasm.client.ClientEventHandler;
 
-    public Minegasm() {
-        ModLoadingContext context = ModLoadingContext.get();
-        context.registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 
-        context.registerConfig(ModConfig.Type.CLIENT, ConfigHolder.CLIENT_SPEC);
-        context.registerConfig(ModConfig.Type.SERVER, ConfigHolder.SERVER_SPEC);
+public class Minegasm implements ModInitializer {
 
-        IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        eventBus.addListener(this::setupCommon);
-        eventBus.addListener(this::setupClient);
+	public static Logger LOGGER = LogManager.getLogger();
 
-        context.registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (mc, screen) -> new ConfigScreen(screen));
-    }
+	public static final String MOD_ID = "minegasm";
+	public static final String MOD_NAME = "Minegasm";
 
-    private void setupCommon(final FMLCommonSetupEvent event)
-    {
-        LOGGER.info("Common setup...");
-    }
+	@Override
+	public void onInitialize() {
+		log(Level.INFO, "Initializing");
+		AttackEntityCallback.EVENT.register(ClientEventHandler::onAttack);
+	}
 
-    private void setupClient(final FMLClientSetupEvent event) {
-        LOGGER.info("Got game settings {}", event.getMinecraftSupplier().get().options);
-    }
+	public static void log(Level level, String message) {
+		LOGGER.log(level, "[" + MOD_NAME + "] " + message);
+	}
 }
