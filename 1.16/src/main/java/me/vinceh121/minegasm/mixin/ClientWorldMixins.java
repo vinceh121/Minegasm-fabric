@@ -12,6 +12,7 @@ import com.therainbowville.minegasm.client.ClientEventHandler;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
@@ -24,5 +25,10 @@ public class ClientWorldMixins {
 			RegistryKey<World> registryKey, DimensionType dimensionType, int i, Supplier<Profiler> supplier,
 			WorldRenderer worldRenderer, boolean bl, long l, CallbackInfo ci) {
 		ClientEventHandler.onWorldLoaded((World)(Object)this);
+	}
+	
+	@Inject(at = @At("HEAD"), method = "finishRemovingEntity")
+	public void onRemoveEntity(Entity entity, CallbackInfo ci) {
+		ClientEventHandler.onWorldExit(entity);
 	}
 }

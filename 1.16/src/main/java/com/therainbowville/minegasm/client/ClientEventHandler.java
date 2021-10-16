@@ -270,6 +270,12 @@ public class ClientEventHandler {
 		populatePlayerInfo();
 	}
 
+	public static void onWorldExit(Entity entity) {
+		if ((entity instanceof PlayerEntity) && (playerName != null)) {
+			clearState();
+		}
+	}
+
 	/*
 	 * @SubscribeEvent
 	 * public static void onXpChange(PlayerXpEvent.XpChange event) {
@@ -320,12 +326,5 @@ public class ClientEventHandler {
 	 * }
 	 * }
 	 * 
-	 * @SubscribeEvent
-	 * public static void onWorldExit(EntityLeaveWorldEvent event) {
-	 * Entity entity = event.getEntity();
-	 * if ((entity instanceof PlayerEntity) && (playerName != null)) {
-	 * clearState();
-	 * }
-	 * }
 	 */
 }
