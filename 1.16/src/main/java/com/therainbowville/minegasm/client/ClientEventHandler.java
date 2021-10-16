@@ -263,6 +263,13 @@ public class ClientEventHandler {
 			}
 		}
 	}
+
+	public static void onRespawn() {
+		clearState();
+		ToyController.setVibrationLevel(0);
+		populatePlayerInfo();
+	}
+
 	/*
 	 * @SubscribeEvent
 	 * public static void onXpChange(PlayerXpEvent.XpChange event) {
@@ -281,12 +288,6 @@ public class ClientEventHandler {
 	 * }
 	 * }
 	 * 
-	 * @SubscribeEvent
-	 * public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
-	 * clearState();
-	 * ToyController.setVibrationLevel(0);
-	 * populatePlayerInfo();
-	 * }
 	 * 
 	 * 
 	 * 
