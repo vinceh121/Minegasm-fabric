@@ -16,6 +16,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.EntityHitResult;
@@ -226,12 +227,12 @@ public class ClientEventHandler {
 			// ToolType. AXE, HOE, PICKAXE, SHOVEL
 
 			float blockHardness = block.getDefaultState().getHardness(null, null);
-//			LOGGER.debug("Harvest: tool: "
-//					+ block.getHarvestTool(blockState)
-//					+ " can harvest? "
-//					+ event.canHarvest()
-//					+ " hardness: "
-//					+ blockHardness);
+			// LOGGER.debug("Harvest: tool: "
+			// + block.getHarvestTool(blockState)
+			// + " can harvest? "
+			// + event.canHarvest()
+			// + " hardness: "
+			// + blockHardness);
 
 			int intensity
 					= Math.toIntExact(Math.round((getIntensity("harvest") / 100.0 * (blockHardness / 50.0)) * 100));
@@ -242,56 +243,27 @@ public class ClientEventHandler {
 		}
 	}
 
+	public static void onBreak(PlayerEntity player, BlockState blockState) {
+		GameProfile profile = player.getGameProfile();
+
+		if (profile.getId().equals(playerID)) {
+			Block block = blockState.getBlock();
+
+			float blockHardness = block.getDefaultState().getHardness(null, null);
+
+			boolean usingAppropriateTool = player.canHarvest(blockState);
+
+			if (usingAppropriateTool) {
+				LOGGER.info("Breaking: " + block.toString());
+				int duration = Math.max(1,
+						Math.min(5, Math.toIntExact(Math.round(Math.ceil(Math.log(blockHardness + 0.5))))));
+				int intensity
+						= Math.toIntExact(Math.round((getIntensity("mine") / 100.0 * (blockHardness / 50.0)) * 100));
+				setState(getStateCounter(), duration, intensity, true);
+			}
+		}
+	}
 	/*
-	 * @SubscribeEvent
-	 * public static void onBreak(BlockEvent.BreakEvent event) {
-	 * PlayerEntity player = event.getPlayer();
-	 * GameProfile profile = player.getGameProfile();
-	 * 
-	 * if (profile.getId().equals(playerID)) {
-	 * BlockState blockState = event.getState();
-	 * Block block = blockState.getBlock();
-	 * 
-	 * @SuppressWarnings("ConstantConditions")
-	 * float blockHardness = block.defaultBlockState().getDestroySpeed(null, null);
-	 * 
-	 * LOGGER.info("Breaking: " + block.toString());
-	 * 
-	 * ToolType blockHarvestTool = block.getHarvestTool(blockState);
-	 * ItemStack mainhandItem = event.getPlayer().getMainHandItem();
-	 * Set<ToolType> mainhandToolTypes =
-	 * mainhandItem.getItem().getToolTypes(mainhandItem);
-	 * 
-	 * boolean usingPickaxe = mainhandToolTypes.contains(ToolType.PICKAXE);
-	 * boolean usingAppropriateTool = mainhandToolTypes.contains(blockHarvestTool);
-	 * LOGGER.debug("mainhand: " + mainhandItem + " [" + mainhandToolTypes + "]");
-	 * LOGGER.debug("using pickaxe: " + usingPickaxe + ", using appropriate tool: "
-	 * + usingAppropriateTool);
-	 * 
-	 * if (usingPickaxe && usingAppropriateTool) {
-	 * int duration = Math.max(1,
-	 * Math.min(5, Math.toIntExact(Math.round(Math.ceil(Math.log(blockHardness +
-	 * 0.5))))));
-	 * int intensity
-	 * = Math.toIntExact(Math.round((getIntensity("mine") / 100.0 * (blockHardness /
-	 * 50.0)) * 100));
-	 * setState(getStateCounter(), duration, intensity, true);
-	 * }
-	 * 
-	 * LOGGER.info("XP to drop: " + event.getExpToDrop());
-	 * }
-	 * }
-	 * 
-	 * @SubscribeEvent
-	 * public static void onItemPickup(EntityItemPickupEvent event) {
-	 * LOGGER.info("Pickup item: " + event.getItem().toString());
-	 * }
-	 * 
-	 * @SubscribeEvent
-	 * public static void onXpPickup(PlayerXpEvent.PickupXp event) {
-	 * // LOGGER.info("Pickup XP: " + event.getOrb().xpValue);
-	 * }
-	 * 
 	 * @SubscribeEvent
 	 * public static void onXpChange(PlayerXpEvent.XpChange event) {
 	 * PlayerEntity player = event.getPlayer();
