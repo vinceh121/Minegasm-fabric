@@ -24,11 +24,16 @@ public class ClientWorldMixins {
 	public void onWorldLoad(ClientPlayNetworkHandler clientPlayNetworkHandler, ClientWorld.Properties properties,
 			RegistryKey<World> registryKey, DimensionType dimensionType, int i, Supplier<Profiler> supplier,
 			WorldRenderer worldRenderer, boolean bl, long l, CallbackInfo ci) {
-		ClientEventHandler.onWorldLoaded((World)(Object)this);
+		ClientEventHandler.onWorldLoaded((World) (Object) this);
 	}
-	
+
 	@Inject(at = @At("HEAD"), method = "finishRemovingEntity")
 	public void onRemoveEntity(Entity entity, CallbackInfo ci) {
 		ClientEventHandler.onWorldExit(entity);
+	}
+
+	@Inject(at = @At("HEAD"), method = "addEntityPrivate")
+	public void onEntityAdded(int id, Entity entity, CallbackInfo ci) {
+		ClientEventHandler.onWorldEntry(entity);
 	}
 }

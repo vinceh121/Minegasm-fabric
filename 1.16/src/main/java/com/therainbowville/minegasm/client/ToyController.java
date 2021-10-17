@@ -1,6 +1,7 @@
 package com.therainbowville.minegasm.client;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -8,7 +9,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.metafetish.buttplug.client.ButtplugClientDevice;
 import org.metafetish.buttplug.client.ButtplugWSClient;
-import org.metafetish.buttplug.core.messages.SingleMotorVibrateCmd;
+import org.metafetish.buttplug.core.messages.StopAllDevices;
+import org.metafetish.buttplug.core.messages.VibrateCmd;
 
 import com.therainbowville.minegasm.config.MinegasmConfig;
 
@@ -45,12 +47,13 @@ public class ToyController {
 			}
 
 			for (ButtplugClientDevice dev : devices) {
-				if (dev.getAllowedMessages().contains(SingleMotorVibrateCmd.class.getSimpleName())) {
+				if (dev.getAllowedMessages().keySet().contains(VibrateCmd.class.getSimpleName())) {
 					LOGGER.info(dev.getName());
 					device = dev;
 					try {
-						client.sendDeviceMessage(device,
-								new SingleMotorVibrateCmd(device.getIndex(), 0, client.getNextMsgId()));
+						VibrateCmd cmd = new VibrateCmd();
+						cmd.setDeviceIndex(device.getIndex());
+						client.sendDeviceMessage(device, cmd);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -62,7 +65,7 @@ public class ToyController {
 				Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 					try {
 						LOGGER.info("Disconnecting devices...");
-						client.stopAllDevices();
+						client.sendMessage(new StopAllDevices());
 						client.Disconnect();
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -82,13 +85,25 @@ public class ToyController {
 	}
 
 	public static void setVibrationLevel(double level) {
+		new Thread(() -> setVibrationLevel0(level), "ButtplugSendThread").start();
+	}
+	
+	private static void setVibrationLevel0(double level) {
 		if (Objects.isNull(device))
 			return;
 
 		if (MinegasmConfig.INSTANCE.vibrate) {
 			try {
-				client.sendDeviceMessage(device, new SingleMotorVibrateCmd(device.getIndex(), level, client.getNextMsgId()));
-				currentVibrationLevel = level;
+				if (level == 0) {
+					client.sendMessage(new StopAllDevices());
+				} else {
+					VibrateCmd cmd = new VibrateCmd();
+					cmd.setDeviceIndex(device.getIndex());
+					cmd.setSpeeds(Collections.singletonList(new VibrateCmd.Speed(0, level)));
+					client.sendDeviceMessage(device, cmd);
+					currentVibrationLevel = level;
+				}
+
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -96,8 +111,10 @@ public class ToyController {
 			if (currentVibrationLevel > 0) {
 				try {
 					level = 0;
-					client.sendDeviceMessage(device,
-							new SingleMotorVibrateCmd(device.getIndex(), level, client.getNextMsgId()));
+					VibrateCmd cmd = new VibrateCmd();
+					cmd.setDeviceIndex(device.getIndex());
+					cmd.setSpeeds(Collections.singletonList(new VibrateCmd.Speed(0, level)));
+					client.sendDeviceMessage(device, cmd);
 					currentVibrationLevel = level;
 				} catch (Exception e) {
 					e.printStackTrace();

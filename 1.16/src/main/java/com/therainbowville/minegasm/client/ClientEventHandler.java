@@ -14,10 +14,12 @@ import com.therainbowville.minegasm.config.MinegasmConfig;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.text.LiteralText;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.world.World;
@@ -276,6 +278,30 @@ public class ClientEventHandler {
 		}
 	}
 
+	public static void onWorldEntry(Entity entity) {
+		if (entity instanceof ClientPlayerEntity) {
+			System.out.println("Entered world: " + entity.toString());
+
+			if (playerName != null) {
+				PlayerEntity player = (PlayerEntity) entity;
+				GameProfile profile = player.getGameProfile();
+
+				if (profile.getId().equals(playerID)) {
+					System.out.println("Player in: " + playerName + " " + playerID.toString());
+					if (ToyController.connectDevice()) {
+						setState(getStateCounter(), 5);
+						player.sendMessage(new LiteralText(String.format(
+								"Connected to " + Formatting.GREEN + "%s" + Formatting.RESET + " [%d]",
+								ToyController.getDeviceName(), ToyController.getDeviceId())), true);
+					} else {
+						player.sendMessage(new LiteralText(String.format(
+								Formatting.YELLOW + "Minegasm " + Formatting.RESET + "failed to start\n%s",
+								ToyController.getLastErrorMessage())), false);
+					}
+				}
+			}
+		}
+	}
 	/*
 	 * @SubscribeEvent
 	 * public static void onXpChange(PlayerXpEvent.XpChange event) {
@@ -297,34 +323,6 @@ public class ClientEventHandler {
 	 * 
 	 * 
 	 * 
-	 * @SubscribeEvent
-	 * public static void onWorldEntry(EntityJoinWorldEvent event) {
-	 * Entity entity = event.getEntity();
-	 * if (entity instanceof ClientPlayerEntity) {
-	 * System.out.println("Entered world: " + entity.toString());
-	 * 
-	 * if (playerName != null) {
-	 * PlayerEntity player = (PlayerEntity) entity;
-	 * GameProfile profile = player.getGameProfile();
-	 * 
-	 * if (profile.getId().equals(playerID)) {
-	 * System.out.println("Player in: " + playerName + " " + playerID.toString());
-	 * if (ToyController.connectDevice()) {
-	 * setState(getStateCounter(), 5);
-	 * player.displayClientMessage(new StringTextComponent(String.format(
-	 * "Connected to " + TextFormatting.GREEN + "%s" + TextFormatting.RESET +
-	 * " [%d]",
-	 * ToyController.getDeviceName(), ToyController.getDeviceId())), true);
-	 * } else {
-	 * player.displayClientMessage(new StringTextComponent(String.format(
-	 * TextFormatting.YELLOW + "Minegasm " + TextFormatting.RESET +
-	 * "failed to start\n%s",
-	 * ToyController.getLastErrorMessage())), false);
-	 * }
-	 * }
-	 * }
-	 * }
-	 * }
 	 * 
 	 */
 }
