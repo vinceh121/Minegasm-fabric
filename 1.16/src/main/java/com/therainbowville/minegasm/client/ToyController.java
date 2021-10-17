@@ -85,10 +85,6 @@ public class ToyController {
 	}
 
 	public static void setVibrationLevel(double level) {
-		new Thread(() -> setVibrationLevel0(level), "ButtplugSendThread").start();
-	}
-	
-	private static void setVibrationLevel0(double level) {
 		if (Objects.isNull(device))
 			return;
 
