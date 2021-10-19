@@ -126,13 +126,10 @@ public class ClientEventHandler {
 
 	public static ActionResult onAttack(PlayerEntity player, World world, Hand hand, Entity entity,
 			EntityHitResult hitResult) {
-		if (entity instanceof PlayerEntity) {
-			PlayerEntity targetPlayer = (PlayerEntity) entity;
-			GameProfile profile = targetPlayer.getGameProfile();
+		GameProfile profile = player.getGameProfile();
 
-			if (profile.getId().equals(playerID)) {
-				setState(getStateCounter(), 3, getIntensity("attack"), true);
-			}
+		if (profile.getId().equals(playerID)) {
+			setState(getStateCounter(), 3, getIntensity("attack"), true);
 		}
 		return ActionResult.PASS;
 	}
@@ -168,9 +165,7 @@ public class ClientEventHandler {
 
 				LOGGER.trace("Tick " + stateCounter + ": " + newVibrationLevel);
 
-				if (ToyController.currentVibrationLevel != newVibrationLevel) {
-					ToyController.setVibrationLevel(newVibrationLevel);
-				}
+				ToyController.setVibrationLevel(newVibrationLevel);
 			}
 		}
 
@@ -203,11 +198,11 @@ public class ClientEventHandler {
 		GameProfile profile = MinecraftClient.getInstance().getSession().getProfile();
 		playerName = profile.getName();
 		playerID = profile.getId();
-		System.out.println("Current player: " + playerName + " " + playerID.toString());
+		LOGGER.info("Current player: " + playerName + " " + playerID.toString());
 	}
 
 	public static void onWorldLoaded(World world) {
-		System.out.println("World loaded: " + world.toString());
+		LOGGER.info("World loaded: " + world.toString());
 
 		populatePlayerInfo();
 	}
@@ -225,7 +220,6 @@ public class ClientEventHandler {
 
 		if (profile.getId().equals(playerID)) {
 			Block block = blockState.getBlock();
-
 			// ToolType. AXE, HOE, PICKAXE, SHOVEL
 
 			float blockHardness = block.getDefaultState().getHardness(null, null);
@@ -240,7 +234,7 @@ public class ClientEventHandler {
 					= Math.toIntExact(Math.round((getIntensity("harvest") / 100.0 * (blockHardness / 50.0)) * 100));
 
 			if (canHarvest) {
-				setState(getStateCounter(), 1, intensity, false);
+				setState(getStateCounter(), 2, intensity, false);
 			}
 		}
 	}
@@ -256,7 +250,6 @@ public class ClientEventHandler {
 			boolean usingAppropriateTool = player.canHarvest(blockState);
 
 			if (usingAppropriateTool) {
-				LOGGER.info("Breaking: " + block.toString());
 				int duration = Math.max(1,
 						Math.min(5, Math.toIntExact(Math.round(Math.ceil(Math.log(blockHardness + 0.5))))));
 				int intensity
@@ -280,14 +273,14 @@ public class ClientEventHandler {
 
 	public static void onWorldEntry(Entity entity) {
 		if (entity instanceof ClientPlayerEntity) {
-			System.out.println("Entered world: " + entity.toString());
+			LOGGER.info("Entered world: " + entity.toString());
 
 			if (playerName != null) {
 				PlayerEntity player = (PlayerEntity) entity;
 				GameProfile profile = player.getGameProfile();
 
 				if (profile.getId().equals(playerID)) {
-					System.out.println("Player in: " + playerName + " " + playerID.toString());
+					LOGGER.info("Player in: " + playerName + " " + playerID.toString());
 					if (!ToyController.isConnected) {
 						if (ToyController.connectDevice()) {
 							setState(getStateCounter(), 5);
@@ -304,27 +297,18 @@ public class ClientEventHandler {
 			}
 		}
 	}
-	/*
-	 * @SubscribeEvent
-	 * public static void onXpChange(PlayerXpEvent.XpChange event) {
-	 * PlayerEntity player = event.getPlayer();
-	 * GameProfile profile = player.getGameProfile();
-	 * 
-	 * if (profile.getId().equals(playerID)) {
-	 * int xpChange = event.getAmount();
-	 * long duration = Math.round(Math.ceil(Math.log(xpChange + 0.5)));
-	 * 
-	 * LOGGER.info("XP CHANGE: " + xpChange);
-	 * LOGGER.debug("duration: " + duration);
-	 * 
-	 * setState(getStateCounter(), Math.toIntExact(duration),
-	 * getIntensity("xpChange"), true);
-	 * }
-	 * }
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 */
+
+	public static void onXpChange(PlayerEntity player, int xpChange) {
+		GameProfile profile = player.getGameProfile();
+
+		if (profile.getId().equals(playerID)) {
+			long duration = Math.round(Math.ceil(Math.log(xpChange + 0.5)));
+
+			LOGGER.debug("XP CHANGE: " + xpChange);
+			LOGGER.debug("duration: " + duration);
+
+			setState(getStateCounter(), Math.toIntExact(duration), getIntensity("xpChange"), true);
+		}
+	}
+
 }

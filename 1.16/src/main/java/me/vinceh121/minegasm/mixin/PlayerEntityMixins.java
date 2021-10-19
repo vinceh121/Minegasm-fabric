@@ -38,4 +38,9 @@ public abstract class PlayerEntityMixins {
 	private void onHarvestCheck(BlockState state, CallbackInfoReturnable<Boolean> ci) {
 		ClientEventHandler.onHarvest((PlayerEntity) (Object) this, state, ci.getReturnValueZ());
 	}
+
+	@Inject(at = @At("INVOKE"), method = "addExperience(I)V")
+	private void onXpAdded(int xpChange, CallbackInfo ci) {
+		ClientEventHandler.onXpChange((PlayerEntity) (Object) this, xpChange);
+	}
 }
