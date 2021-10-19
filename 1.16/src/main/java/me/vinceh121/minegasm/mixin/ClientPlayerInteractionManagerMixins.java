@@ -1,5 +1,6 @@
 package me.vinceh121.minegasm.mixin;
 
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -9,21 +10,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.therainbowville.minegasm.client.ClientEventHandler;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.network.ServerPlayerInteractionManager;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.util.math.BlockPos;
 
-@Mixin(ServerPlayerInteractionManager.class)
-public class ServerPlayerInteractionManagerMixins {
+@Mixin(ClientPlayerInteractionManager.class)
+public class ClientPlayerInteractionManagerMixins {
 	@Shadow
-	public ServerPlayerEntity player;
-	@Shadow
-	public ServerWorld world;
+	@Final
+	public MinecraftClient client;
 
-	@Inject(method = "tryBreakBlock(Lnet/minecraft/util/math/BlockPos;)Z", at = @At("HEAD"))
+	@Inject(method = "breakBlock(Lnet/minecraft/util/math/BlockPos;)Z", at = @At("HEAD"))
 	private void onBreak(BlockPos pos, CallbackInfoReturnable<Boolean> ci) {
-		BlockState state = world.getBlockState(pos);
-		ClientEventHandler.onBreak(player, state);
+		BlockState state = client.world.getBlockState(pos);
+		ClientEventHandler.onBreak(client.player, state);
 	}
 }

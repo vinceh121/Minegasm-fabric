@@ -31,4 +31,10 @@ public class ClientPlayerEntityMixins {
 			ClientEventHandler.onDeath((PlayerEntity) (Object) this);
 		}
 	}
+
+	@Inject(at = @At("HEAD"), method = "requestRespawn()V")
+	private void onRespawn(CallbackInfo ci) {
+		System.out.println("respawn owo");
+		ClientEventHandler.onRespawn();
+	}
 }
