@@ -1,10 +1,11 @@
 plugins {
 	id 'fabric-loom' version '0.10.9'
 	id 'maven-publish'
+	id 'com.github.johnrengelman.shadow' version '7.1.0'
 }
 
-sourceCompatibility = JavaVersion.VERSION_16
-targetCompatibility = JavaVersion.VERSION_16
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
 
 archivesBaseName = project.archives_base_name
 version = project.mod_version
@@ -36,9 +37,23 @@ dependencies {
 		exclude(group: "net.fabricmc.fabric-api")
 	}
 	include "me.shedaniel.cloth:cloth-config-fabric:4.11.26"
-	modImplementation("com.github.vinceh121:buttplug4j:a9c07463") {
+	shadow(implementation("com.github.vinceh121:buttplug4j:a9c07463") {
 		exclude(module: "buttplug4j.vertx")
-	}
+	})
+}
+
+jar {
+	from "LICENSE"
+	archiveClassifier.set("dev")
+}
+
+shadowJar {
+	configurations = [project.configurations.shadow]
+	archiveClassifier.set("dev")
+}
+
+remapJar {
+	dependsOn(shadowJar)
 }
 
 processResources {
@@ -62,7 +77,7 @@ processResources {
 // see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
 tasks.withType(JavaCompile) {
 	options.encoding = "UTF-8"
-	it.options.release = 16
+	it.options.release = 11
 }
 
 // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
@@ -78,10 +93,6 @@ java {
 	// if it is present.
 	// If you remove this line, sources will not be generated.
 	withSourcesJar()
-}
-
-jar {
-	from "LICENSE"
 }
 
 // configure the maven publication
