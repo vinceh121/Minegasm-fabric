@@ -21,7 +21,7 @@ import net.minecraft.world.dimension.DimensionType;
 
 @Mixin(ClientWorld.class)
 public class ClientWorldMixins {
-	@Inject(at = @At("TAIL"), method = "<init>()V")
+	@Inject(at = @At("TAIL"), method = "<init>")
 	public void onWorldLoad(ClientPlayNetworkHandler netHandler, ClientWorld.Properties properties,
 			RegistryKey<World> registryRef, DimensionType dimensionType, int loadDistance, int simulationDistance,
 			Supplier<Profiler> profiler, WorldRenderer worldRenderer, boolean debugWorld, long seed, CallbackInfo ci) {

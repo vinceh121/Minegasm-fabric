@@ -20,7 +20,7 @@ public class ClientPlayerEntityMixins {
 		ClientEventHandler.onXpChange(thos, level - thos.experienceLevel);
 	}
 
-	@Inject(at = @At("HEAD"), method = "damage(Lnet/minecraft/entity/damage/DamageSource;F)V")
+	@Inject(at = @At("HEAD"), method = "damage(Lnet/minecraft/entity/damage/DamageSource;F)Z")
 	private void playerReceivedDamage(DamageSource source, float health, CallbackInfoReturnable<Boolean> ci) {
 		ClientEventHandler.onHurt(((ClientPlayerEntity) (Object) this).getGameProfile());
 	}
