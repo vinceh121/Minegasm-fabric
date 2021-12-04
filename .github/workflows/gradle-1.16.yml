@@ -6,14 +6,8 @@ name: Build 1.16
 on:
   push:
     branches: [ main ]
-    paths:
-      - '1.16/**'
-      - '.github/workflows/gradle-1.16.yml'
   pull_request:
     branches: [ main ]
-    paths:
-      - '1.16/**'
-      - '.github/workflows/gradle-1.16.yml'
 
 jobs:
   build:
@@ -27,13 +21,12 @@ jobs:
       with:
         java-version: 16
     - name: Grant execute permission for gradlew
-      run: chmod +x 1.16/gradlew        
+      run: chmod +x gradlew        
     - name: Gradle Build Action
       uses: gradle/gradle-build-action@v2.0-beta.4
       with:
-        build-root-directory: 1.16
         arguments: build
     - uses: actions/upload-artifact@v2
       with:
         name: Package
-        path: 1.16/build/libs
+        path: build/libs
