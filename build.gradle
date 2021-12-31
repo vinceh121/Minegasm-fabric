@@ -37,7 +37,7 @@ dependencies {
 		exclude(group: "net.fabricmc.fabric-api")
 	}
 	include "me.shedaniel.cloth:cloth-config-fabric:6.0.45"
-	shadow(implementation("com.github.vinceh121:buttplug4j:a9c07463") {
+	shadow(implementation("com.github.vinceh121:buttplug4j:881edf6") {
 		exclude(module: "buttplug4j.vertx")
 	})
 }
