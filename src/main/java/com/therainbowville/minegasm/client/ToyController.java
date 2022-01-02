@@ -9,6 +9,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.metafetish.buttplug.client.ButtplugClientDevice;
 import org.metafetish.buttplug.client.ButtplugWSClient;
+import org.metafetish.buttplug.core.messages.LinearCmd;
+import org.metafetish.buttplug.core.messages.RotateCmd;
 import org.metafetish.buttplug.core.messages.StopAllDevices;
 import org.metafetish.buttplug.core.messages.VibrateCmd;
 
@@ -22,6 +24,7 @@ public class ToyController {
 	public static String lastErrorMessage = "";
 	public static boolean isConnected = false;
 	public static double currentVibrationLevel = 0;
+	private static Class<?> CMD;
 
 	public static boolean connectDevice() {
 		try {
@@ -47,15 +50,17 @@ public class ToyController {
 			}
 
 			for (ButtplugClientDevice dev : devices) {
-				if (dev.getAllowedMessages().keySet().contains(VibrateCmd.class.getSimpleName())) {
+				if (dev.getAllowedMessages().keySet().contains(VibrateCmd.class.getSimpleName())
+						|| dev.getAllowedMessages().keySet().contains(LinearCmd.class.getSimpleName())) {
 					LOGGER.info(dev.getName());
 					device = dev;
-					try {
-						VibrateCmd cmd = new VibrateCmd();
-						cmd.setDeviceIndex(device.getIndex());
-						client.sendDeviceMessage(device, cmd);
-					} catch (Exception e) {
-						e.printStackTrace();
+
+					if (dev.getAllowedMessages().keySet().contains(VibrateCmd.class.getSimpleName())) {
+						CMD = VibrateCmd.class;
+					} else if (dev.getAllowedMessages().keySet().contains(LinearCmd.class.getSimpleName())) {
+						CMD = LinearCmd.class;
+					} else if (dev.getAllowedMessages().keySet().contains(RotateCmd.class.getSimpleName())) {
+						CMD = RotateCmd.class;
 					}
 					break;
 				}
@@ -89,33 +94,45 @@ public class ToyController {
 			return;
 
 		if (MinegasmConfig.INSTANCE.vibrate) {
-			try {
-				if (level == 0) {
-					client.sendMessage(new StopAllDevices());
-				} else {
-					VibrateCmd cmd = new VibrateCmd();
-					cmd.setDeviceIndex(device.getIndex());
-					cmd.setSpeeds(Collections.singletonList(new VibrateCmd.Speed(0, level)));
-					client.sendDeviceMessage(device, cmd);
-					currentVibrationLevel = level;
-				}
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		} else {
-			if (currentVibrationLevel > 0) {
+			if (level == 0 && (CMD == VibrateCmd.class || CMD == RotateCmd.class)) {
 				try {
-					level = 0;
-					VibrateCmd cmd = new VibrateCmd();
-					cmd.setDeviceIndex(device.getIndex());
-					cmd.setSpeeds(Collections.singletonList(new VibrateCmd.Speed(0, level)));
-					client.sendDeviceMessage(device, cmd);
-					currentVibrationLevel = level;
+					client.sendMessage(new StopAllDevices());
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+			} else {
+				_setVibrationLevel(level);
 			}
+		} else {
+			if (currentVibrationLevel > 0) {
+				_setVibrationLevel(level);
+			}
+		}
+	}
+
+	private static void _setVibrationLevel(double level) {
+		try {
+			if (CMD == VibrateCmd.class) {
+				VibrateCmd cmd = new VibrateCmd();
+				cmd.setDeviceIndex(device.getIndex());
+				cmd.setSpeeds(Collections.singletonList(new VibrateCmd.Speed(0, level)));
+				client.sendDeviceMessage(device, cmd);
+			} else if (CMD == LinearCmd.class) {
+				LinearCmd cmd = new LinearCmd();
+				cmd.setDeviceIndex(device.getIndex());
+				cmd.setVectors(Collections.singletonList(new LinearCmd.Vector(0, 0, level)));
+				client.sendDeviceMessage(device, cmd);
+			} else if (CMD == RotateCmd.class) {
+				RotateCmd cmd = new RotateCmd();
+				cmd.setDeviceIndex(device.getIndex());
+				RotateCmd.Rotation rot = new RotateCmd.Rotation(); // TODO fix this missing constructor in buttplug4j
+				rot.setSpeed(level);
+				cmd.setRotations(Collections.singletonList(rot));
+				client.sendDeviceMessage(device, cmd);
+			}
+			currentVibrationLevel = level;
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
