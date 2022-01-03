@@ -66,6 +66,13 @@ public class ToyController {
 				}
 			}
 
+			if (device == null) {
+				LOGGER.warn("Couldn't find a compatible device");
+				for (ButtplugClientDevice dev : devices) {
+					LOGGER.warn("{}: {}", dev.getName(), dev.getAllowedMessages());
+				}
+			}
+
 			if (Objects.nonNull(device) && !shutDownHookAdded) {
 				Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 					try {
