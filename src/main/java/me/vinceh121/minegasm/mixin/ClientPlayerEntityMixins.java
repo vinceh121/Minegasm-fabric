@@ -35,7 +35,6 @@ public class ClientPlayerEntityMixins {
 
 	@Inject(at = @At("HEAD"), method = "requestRespawn()V")
 	private void onRespawn(CallbackInfo ci) {
-		Minegasm.LOGGER.info("u've wespawnyed uwu ᗜˬᗜ");
 		ClientEventHandler.onRespawn();
 	}
 }
