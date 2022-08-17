@@ -17,7 +17,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
@@ -284,11 +284,11 @@ public class ClientEventHandler {
 					if (!ToyController.isConnected) {
 						if (ToyController.connectDevice()) {
 							setState(getStateCounter(), 5);
-							player.sendMessage(new LiteralText(String.format(
+							player.sendMessage(Text.literal(String.format(
 									"Connected to " + Formatting.GREEN + "%s" + Formatting.RESET + " [%d]",
 									ToyController.getDeviceName(), ToyController.getDeviceId())), true);
 						} else {
-							player.sendMessage(new LiteralText(String.format(
+							player.sendMessage(Text.literal(String.format(
 									Formatting.YELLOW + "Minegasm " + Formatting.RESET + "failed to start\n%s",
 									ToyController.getLastErrorMessage())), false);
 						}
