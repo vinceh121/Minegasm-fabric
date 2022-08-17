@@ -13,8 +13,10 @@ import com.therainbowville.minegasm.client.ClientEventHandler;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.client.world.ClientWorld.Properties;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.profiler.Profiler;
+import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
@@ -22,8 +24,8 @@ import net.minecraft.world.dimension.DimensionType;
 @Mixin(ClientWorld.class)
 public class ClientWorldMixins {
 	@Inject(at = @At("TAIL"), method = "<init>")
-	public void onWorldLoad(ClientPlayNetworkHandler netHandler, ClientWorld.Properties properties,
-			RegistryKey<World> registryRef, DimensionType dimensionType, int loadDistance, int simulationDistance,
+	public void onWorldLoad(ClientPlayNetworkHandler netHandler, Properties properties, RegistryKey<World> registryRef,
+			RegistryEntry<DimensionType> registryEntry, int loadDistance, int simulationDistance,
 			Supplier<Profiler> profiler, WorldRenderer worldRenderer, boolean debugWorld, long seed, CallbackInfo ci) {
 		ClientEventHandler.onWorldLoaded((World) (Object) this);
 	}
