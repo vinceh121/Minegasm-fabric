@@ -8,8 +8,7 @@ import com.therainbowville.minegasm.client.ToyController;
 import com.therainbowville.minegasm.config.MinegasmConfig;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 
 public class Minegasm implements ModInitializer {
@@ -26,12 +25,10 @@ public class Minegasm implements ModInitializer {
 		LOGGER.info(MinegasmConfig.INSTANCE.toString());
 		AttackEntityCallback.EVENT.register(ClientEventHandler::onAttack);
 
-		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-			dispatcher.register(ClientCommandManager.literal("minegasm-reconnect").executes(o -> {
-				ToyController.connectDevice();
-				return 0;
-			}));
-		});
+		ClientCommandManager.DISPATCHER.register(ClientCommandManager.literal("minegasm-reconnect").executes(o -> {
+			ToyController.connectDevice();
+			return 0;
+		}));
 	}
 
 }
