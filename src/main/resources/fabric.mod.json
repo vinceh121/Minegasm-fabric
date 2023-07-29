@@ -1,30 +1,30 @@
 {
-  "schemaVersion" : 1,
-  "id" : "minegasm",
-  "version" : "2.1.1",
-  "name" : "Minegasm",
-  "description" : "minegasm-fabric = Fabric + teledildonics",
-  "authors" : [ "RainbowVille", "vinceh121" ],
-  "contributors" : [ ],
-  "contact" : {
-    "homepage" : "https://github.com/vinceh121/minegasm-fabric",
-    "sources" : "https://github.com/vinceh121/minegasm-fabric"
+  "schemaVersion": 1,
+  "id": "minegasm",
+  "version": "2.1.1",
+  "name": "Minegasm",
+  "description": "minegasm-fabric = Fabric + teledildonics",
+  "authors": ["RainbowVille", "vinceh121"],
+  "contributors": [],
+  "contact": {
+    "homepage": "https://github.com/vinceh121/minegasm-fabric",
+    "sources": "https://github.com/vinceh121/minegasm-fabric"
   },
-  "license" : "AGPL-3.0",
-  "icon" : "assets/minegasm/icon.png",
-  "environment" : "*",
-  "entrypoints" : {
-    "main" : [ "com.therainbowville.minegasm.common.Minegasm" ],
-    "client" : [ ],
-    "server" : [ ],
-    "modmenu": [ "com.therainbowville.minegasm.config.MinegasmModMenu" ]
+  "license": "AGPL-3.0",
+  "icon": "assets/minegasm/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.therainbowville.minegasm.common.Minegasm"],
+    "client": [],
+    "server": [],
+    "modmenu": ["com.therainbowville.minegasm.config.MinegasmModMenu"]
   },
-  "mixins" : [ "minegasm.mixins.json" ],
-  "depends" : {
-    "fabricloader" : ">=0.14.9",
+  "mixins": ["minegasm.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.14.21",
     "fabric": "*",
-    "minecraft": "1.19.2",
+    "minecraft": "1.20.1",
     "java": ">=17",
-    "modmenu": "4.x.x"
+    "modmenu": "7.x.x"
   }
 }
