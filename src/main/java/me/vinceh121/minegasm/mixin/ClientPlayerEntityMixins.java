@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.therainbowville.minegasm.client.ClientEventHandler;
 
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.player.PlayerEntity;
 
 @Mixin(ClientPlayerEntity.class)
 public class ClientPlayerEntityMixins {
@@ -18,11 +17,10 @@ public class ClientPlayerEntityMixins {
 		ClientEventHandler.onXpChange(thos, level - thos.experienceLevel);
 	}
 
-	@Inject(at = @At("INVOKE"), method = "updateHealth(F)V")
-	private void onGoCommitDie(float health, CallbackInfo ci) {
-		if (health == 0) {
-			ClientEventHandler.onDeath((PlayerEntity) (Object) this);
-		}
+	@Inject(at = @At("HEAD"), method = "updatePostDeath()V")
+	private void onDeath(CallbackInfo ci) { // this gets called every tick when an entity is dead, but still present,
+											// shouldn't be a problem
+		ClientEventHandler.onDeath((ClientPlayerEntity) (Object) this);
 	}
 
 	@Inject(at = @At("HEAD"), method = "requestRespawn()V")
