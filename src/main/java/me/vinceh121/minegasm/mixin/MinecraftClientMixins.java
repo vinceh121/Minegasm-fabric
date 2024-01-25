@@ -13,6 +13,13 @@ import net.minecraft.client.MinecraftClient;
 public class MinecraftClientMixins {
 	@Inject(at = @At("TAIL"), method = "tick()V")
 	private void onTickEnd(CallbackInfo ci) {
+		@SuppressWarnings("resource")
+		MinecraftClient thos = (MinecraftClient) (Object) this;
+
 		ClientEventHandler.onClientTick();
+
+		if (thos.player != null) {
+			ClientEventHandler.onPlayerTick(thos.player);
+		}
 	}
 }

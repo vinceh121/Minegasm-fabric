@@ -25,18 +25,17 @@ import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.world.World;
 
 public class ClientEventHandler {
-	private static final org.apache.logging.log4j.Logger LOGGER = LogManager.getLogger();
-	private static String playerName = null;
-	private static UUID playerID = null;
+	private static final org.apache.logging.log4j.Logger LOGGER = LogManager.getLogger(ClientEventHandler.class);
 	private static final int TICKS_PER_SECOND = 20;
+	private static final double[] state = new double[1200];
+	private static String playerName = null;
 	private static int tickCounter = -1;
 	private static int clientTickCounter = -1;
-	private static final double[] state = new double[1200];
 	private static boolean paused = false;
+	private static float previousPlayerHealth = Float.NaN;
 
 	private static void clearState() {
 		playerName = null;
-		playerID = null;
 		tickCounter = -1;
 		clientTickCounter = -1;
 		Arrays.fill(state, 0);
@@ -128,14 +127,14 @@ public class ClientEventHandler {
 			EntityHitResult hitResult) {
 		GameProfile profile = player.getGameProfile();
 
-		if (profile.getId().equals(playerID)) {
+		if (profile.getId().equals(getPlayerId())) {
 			setState(getStateCounter(), 3, getIntensity("attack"), true);
 		}
 		return ActionResult.PASS;
 	}
 
 	public static void onHurt(GameProfile profile) {
-		if (profile.getId().equals(playerID)) {
+		if (profile.getId().equals(getPlayerId())) {
 			setState(getStateCounter(), 3, getIntensity("hurt"), true);
 		}
 	}
@@ -149,7 +148,7 @@ public class ClientEventHandler {
 		tickCounter = (tickCounter + 1) % (20 * (60 * TICKS_PER_SECOND)); // 20 min day cycle
 
 		if (tickCounter % TICKS_PER_SECOND == 0) { // every 1 sec
-			if (profile.getId().equals(playerID)) {
+			if (profile.getId().equals(MinecraftClient.getInstance().getSession().getUuidOrNull())) {
 				int stateCounter = getStateCounter();
 
 				if (GameplayMode.MASOCHIST.equals(MinegasmConfig.INSTANCE.mode)) {
@@ -159,6 +158,12 @@ public class ClientEventHandler {
 				} else if (playerHealth >= 20 && playerFoodLevel >= 20) {
 					setState(stateCounter, getIntensity("vitality"));
 				}
+				
+				if (player.getHealth() < previousPlayerHealth) {
+					onHurt(profile);
+				}
+				
+				previousPlayerHealth = player.getHealth();
 
 				double newVibrationLevel = state[stateCounter];
 				state[stateCounter] = 0;
@@ -197,8 +202,7 @@ public class ClientEventHandler {
 	private static void populatePlayerInfo() {
 		GameProfile profile = MinecraftClient.getInstance().getSession().getProfile();
 		playerName = profile.getName();
-		playerID = profile.getId();
-		LOGGER.info("Current player: " + playerName + " " + playerID.toString());
+		LOGGER.info("Current player: " + playerName + " " + getPlayerId());
 	}
 
 	public static void onWorldLoaded(World world) {
@@ -210,7 +214,7 @@ public class ClientEventHandler {
 	public static void onDeath(PlayerEntity player) {
 		GameProfile profile = player.getGameProfile();
 
-		if (profile.getId().equals(playerID)) {
+		if (profile.getId().equals(getPlayerId())) {
 			ToyController.setVibrationLevel(0);
 		}
 	}
@@ -218,7 +222,7 @@ public class ClientEventHandler {
 	public static void onHarvest(PlayerEntity player, BlockState blockState, boolean canHarvest) {
 		GameProfile profile = player.getGameProfile();
 
-		if (profile.getId().equals(playerID)) {
+		if (profile.getId().equals(getPlayerId())) {
 			Block block = blockState.getBlock();
 			// ToolType. AXE, HOE, PICKAXE, SHOVEL
 
@@ -242,7 +246,7 @@ public class ClientEventHandler {
 	public static void onBreak(PlayerEntity player, BlockState blockState) {
 		GameProfile profile = player.getGameProfile();
 
-		if (profile.getId().equals(playerID)) {
+		if (profile.getId().equals(getPlayerId())) {
 			Block block = blockState.getBlock();
 
 			float blockHardness = block.getDefaultState().getHardness(null, null);
@@ -279,8 +283,8 @@ public class ClientEventHandler {
 				PlayerEntity player = (PlayerEntity) entity;
 				GameProfile profile = player.getGameProfile();
 
-				if (profile.getId().equals(playerID)) {
-					LOGGER.info("Player in: " + playerName + " " + playerID.toString());
+				if (profile.getId().equals(getPlayerId())) {
+					LOGGER.info("Player in: " + playerName + " " + getPlayerId().toString());
 					if (!ToyController.isConnected) {
 						if (ToyController.connectDevice()) {
 							setState(getStateCounter(), 5);
@@ -301,7 +305,7 @@ public class ClientEventHandler {
 	public static void onXpChange(PlayerEntity player, int xpChange) {
 		GameProfile profile = player.getGameProfile();
 
-		if (profile.getId().equals(playerID)) {
+		if (profile.getId().equals(getPlayerId())) {
 			long duration = Math.round(Math.ceil(Math.log(xpChange + 0.5)));
 
 			LOGGER.debug("XP CHANGE: " + xpChange);
@@ -311,4 +315,10 @@ public class ClientEventHandler {
 		}
 	}
 
+	public static UUID getPlayerId() {
+		@SuppressWarnings("resource")
+		ClientPlayerEntity player = MinecraftClient.getInstance().player;
+
+		return player == null ? null : player.getUuid();
+	}
 }

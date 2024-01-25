@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "minegasm",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "name": "Minegasm",
   "description": "minegasm-fabric = Fabric + teledildonics",
   "authors": ["RainbowVille", "vinceh121"],
