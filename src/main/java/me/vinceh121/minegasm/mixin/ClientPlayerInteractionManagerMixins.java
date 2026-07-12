@@ -9,28 +9,28 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.therainbowville.minegasm.client.ClientEventHandler;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.world.level.block.state.BlockState;
 
-@Mixin(ClientPlayerInteractionManager.class)
+@Mixin(MultiPlayerGameMode.class)
 public class ClientPlayerInteractionManagerMixins {
 	@Shadow
 	@Final
-	public MinecraftClient client;
+	private Minecraft minecraft;
 
-	@Inject(method = "breakBlock(Lnet/minecraft/util/math/BlockPos;)Z", at = @At("HEAD"))
+	@Inject(method = "destroyBlock(Lnet/minecraft/core/BlockPos;)Z", at = @At("HEAD"))
 	private void onBreak(BlockPos pos, CallbackInfoReturnable<Boolean> ci) {
-		BlockState state = this.client.world.getBlockState(pos);
-		ClientEventHandler.onBreak(client.player, state);
+		BlockState state = this.minecraft.level.getBlockState(pos);
+		ClientEventHandler.onBreak(minecraft.player, state);
 	}
 
-	@Inject(at = @At("RETURN"), method = "updateBlockBreakingProgress(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/Direction;)Z")
+	@Inject(at = @At("RETURN"), method = "continueDestroyBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction;)Z")
 	private void onHarvestCheck(BlockPos pos, Direction dic, CallbackInfoReturnable<Boolean> ci) {
-		BlockState state = this.client.world.getBlockState(pos);
+		BlockState state = this.minecraft.level.getBlockState(pos);
 
-		ClientEventHandler.onHarvest(this.client.player, state, this.client.player.canHarvest(state));
+		ClientEventHandler.onHarvest(this.minecraft.player, state, this.minecraft.player.hasCorrectToolForDrops(state));
 	}
 }

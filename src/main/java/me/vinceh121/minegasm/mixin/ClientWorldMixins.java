@@ -1,7 +1,5 @@
 package me.vinceh121.minegasm.mixin;
 
-import java.util.function.Supplier;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -10,24 +8,23 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import com.therainbowville.minegasm.client.ClientEventHandler;
 
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.client.world.ClientWorld.Properties;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.profiler.Profiler;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.ClientLevel.ClientLevelData;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.dimension.DimensionType;
 
-@Mixin(ClientWorld.class)
+@Mixin(ClientLevel.class)
 public class ClientWorldMixins {
 	@Inject(at = @At("TAIL"), method = "<init>")
-	public void onWorldLoad(ClientPlayNetworkHandler netHandler, Properties properties, RegistryKey<World> registryRef,
-			RegistryEntry<DimensionType> registryEntry, int loadDistance, int simulationDistance,
-			Supplier<Profiler> profiler, WorldRenderer worldRenderer, boolean debugWorld, long seed, CallbackInfo ci) {
-		ClientEventHandler.onWorldLoaded((World) (Object) this);
+	public void onWorldLoad(ClientPacketListener connection, ClientLevelData levelData, ResourceKey<Level> dimension,
+			Holder<DimensionType> dimensionType, int serverChunkRadius, int serverSimulationDistance,
+			LevelRenderer levelRenderer, boolean isDebug, long biomeZoomSeed, int seaLevel, CallbackInfo ci) {
+		ClientEventHandler.onWorldLoaded((Level) (Object) this);
 	}
 
 	@Inject(at = @At("TAIL"), method = "removeEntity", locals = LocalCapture.CAPTURE_FAILEXCEPTION)

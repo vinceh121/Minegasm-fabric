@@ -7,23 +7,23 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.therainbowville.minegasm.client.ClientEventHandler;
 
-import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.player.LocalPlayer;
 
-@Mixin(ClientPlayerEntity.class)
+@Mixin(LocalPlayer.class)
 public class ClientPlayerEntityMixins {
-	@Inject(at = @At("HEAD"), method = "setExperience(FII)V")
+	@Inject(at = @At("HEAD"), method = "setExperienceValues(FII)V")
 	private void onXpAdded(float progress, int total, int level, CallbackInfo ci) {
-		ClientPlayerEntity thos = (ClientPlayerEntity) (Object) this;
+		LocalPlayer thos = (LocalPlayer) (Object) this;
 		ClientEventHandler.onXpChange(thos, level - thos.experienceLevel);
 	}
 
-	@Inject(at = @At("HEAD"), method = "updatePostDeath()V")
+	@Inject(at = @At("HEAD"), method = "tickDeath()V")
 	private void onDeath(CallbackInfo ci) { // this gets called every tick when an entity is dead, but still present,
 											// shouldn't be a problem
-		ClientEventHandler.onDeath((ClientPlayerEntity) (Object) this);
+		ClientEventHandler.onDeath((LocalPlayer) (Object) this);
 	}
 
-	@Inject(at = @At("HEAD"), method = "requestRespawn()V")
+	@Inject(at = @At("HEAD"), method = "respawn()V")
 	private void onRespawn(CallbackInfo ci) {
 		ClientEventHandler.onRespawn();
 	}
