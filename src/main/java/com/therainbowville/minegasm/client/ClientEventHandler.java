@@ -5,25 +5,24 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import net.minecraft.client.session.Session;
 import org.apache.logging.log4j.LogManager;
 
 import com.mojang.authlib.GameProfile;
 import com.therainbowville.minegasm.config.GameplayMode;
 import com.therainbowville.minegasm.config.MinegasmConfig;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.EntityHitResult;
 
 public class ClientEventHandler {
 	private static final org.apache.logging.log4j.Logger LOGGER = LogManager.getLogger(ClientEventHandler.class);
@@ -124,32 +123,32 @@ public class ClientEventHandler {
 		}
 	}
 
-	public static ActionResult onAttack(PlayerEntity player, World world, Hand hand, Entity entity,
+	public static InteractionResult onAttack(Player player, Level world, InteractionHand hand, Entity entity,
 			EntityHitResult hitResult) {
 		GameProfile profile = player.getGameProfile();
 
-		if (profile.getId().equals(getPlayerId())) {
+		if (profile.id().equals(getPlayerId())) {
 			setState(getStateCounter(), 3, getIntensity("attack"), true);
 		}
-		return ActionResult.PASS;
+		return InteractionResult.PASS;
 	}
 
 	public static void onHurt(GameProfile profile) {
-		if (profile.getId().equals(getPlayerId())) {
+		if (profile.id().equals(getPlayerId())) {
 			setState(getStateCounter(), 3, getIntensity("hurt"), true);
 		}
 	}
 
-	public static void onPlayerTick(PlayerEntity player) {
+	public static void onPlayerTick(Player player) {
 		GameProfile profile = player.getGameProfile();
 
 		float playerHealth = player.getHealth();
-		float playerFoodLevel = player.getHungerManager().getFoodLevel();
+		float playerFoodLevel = player.getFoodData().getFoodLevel();
 
 		tickCounter = (tickCounter + 1) % (20 * (60 * TICKS_PER_SECOND)); // 20 min day cycle
 
 		if (tickCounter % TICKS_PER_SECOND == 0) { // every 1 sec
-			if (profile.getId().equals(MinecraftClient.getInstance().getSession().getUuidOrNull())) {
+			if (profile.id().equals(Minecraft.getInstance().getUser().getProfileId())) {
 				int stateCounter = getStateCounter();
 
 				if (GameplayMode.MASOCHIST.equals(MinegasmConfig.INSTANCE.mode)) {
@@ -201,33 +200,32 @@ public class ClientEventHandler {
 	}
 
 	private static void populatePlayerInfo() {
-		Session.AccountType profile = MinecraftClient.getInstance().getSession().getAccountType();
-		playerName = profile.getName();
+		playerName = Minecraft.getInstance().getUser().getName();
 		LOGGER.info("Current player: " + playerName + " " + getPlayerId());
 	}
 
-	public static void onWorldLoaded(World world) {
+	public static void onWorldLoaded(Level world) {
 		LOGGER.info("World loaded: " + world.toString());
 
 		populatePlayerInfo();
 	}
 
-	public static void onDeath(PlayerEntity player) {
+	public static void onDeath(Player player) {
 		GameProfile profile = player.getGameProfile();
 
-		if (profile.getId().equals(getPlayerId())) {
+		if (profile.id().equals(getPlayerId())) {
 			ToyController.setVibrationLevel(0);
 		}
 	}
 
-	public static void onHarvest(PlayerEntity player, BlockState blockState, boolean canHarvest) {
+	public static void onHarvest(Player player, BlockState blockState, boolean canHarvest) {
 		GameProfile profile = player.getGameProfile();
 
-		if (profile.getId().equals(getPlayerId())) {
+		if (profile.id().equals(getPlayerId())) {
 			Block block = blockState.getBlock();
 			// ToolType. AXE, HOE, PICKAXE, SHOVEL
 
-			float blockHardness = block.getDefaultState().getHardness(null, null);
+			float blockHardness = block.defaultBlockState().getDestroySpeed(null, null);
 			// LOGGER.debug("Harvest: tool: "
 			// + block.getHarvestTool(blockState)
 			// + " can harvest? "
@@ -244,15 +242,15 @@ public class ClientEventHandler {
 		}
 	}
 
-	public static void onBreak(PlayerEntity player, BlockState blockState) {
+	public static void onBreak(Player player, BlockState blockState) {
 		GameProfile profile = player.getGameProfile();
 
-		if (profile.getId().equals(getPlayerId())) {
+		if (profile.id().equals(getPlayerId())) {
 			Block block = blockState.getBlock();
 
-			float blockHardness = block.getDefaultState().getHardness(null, null);
+			float blockHardness = block.defaultBlockState().getDestroySpeed(null, null);
 
-			boolean usingAppropriateTool = player.canHarvest(blockState);
+			boolean usingAppropriateTool = player.hasCorrectToolForDrops(blockState);
 
 			if (usingAppropriateTool) {
 				int duration = Math.max(1,
@@ -271,31 +269,31 @@ public class ClientEventHandler {
 	}
 
 	public static void onWorldExit(Entity entity) {
-		if ((entity instanceof PlayerEntity) && (playerName != null)) {
+		if ((entity instanceof Player) && (playerName != null)) {
 			clearState();
 		}
 	}
 
 	public static void onWorldEntry(Entity entity) {
-		if (entity instanceof ClientPlayerEntity) {
+		if (entity instanceof LocalPlayer) {
 			LOGGER.info("Entered world: " + entity.toString());
 
 			if (playerName != null) {
-				PlayerEntity player = (PlayerEntity) entity;
+				Player player = (Player) entity;
 				GameProfile profile = player.getGameProfile();
 
-				if (profile.getId().equals(getPlayerId())) {
+				if (profile.id().equals(getPlayerId())) {
 					LOGGER.info("Player in: " + playerName + " " + getPlayerId().toString());
 					if (!ToyController.isConnected) {
 						if (ToyController.connectDevice()) {
 							setState(getStateCounter(), 5);
-							player.sendMessage(Text.literal(String.format(
-									"Connected to " + Formatting.GREEN + "%s" + Formatting.RESET + " [%d]",
-									ToyController.getDeviceName(), ToyController.getDeviceId())), true);
+							player.sendOverlayMessage(Component.literal(String.format(
+									"Connected to " + ChatFormatting.GREEN + "%s" + ChatFormatting.RESET + " [%d]",
+									ToyController.getDeviceName(), ToyController.getDeviceId())));
 						} else {
-							player.sendMessage(Text.literal(String.format(
-									Formatting.YELLOW + "Minegasm " + Formatting.RESET + "failed to start\n%s",
-									ToyController.getLastErrorMessage())), false);
+							player.sendSystemMessage(Component.literal(String.format(
+									ChatFormatting.YELLOW + "Minegasm " + ChatFormatting.RESET + "failed to start\n%s",
+									ToyController.getLastErrorMessage())));
 						}
 					}
 				}
@@ -303,10 +301,10 @@ public class ClientEventHandler {
 		}
 	}
 
-	public static void onXpChange(PlayerEntity player, int xpChange) {
+	public static void onXpChange(Player player, int xpChange) {
 		GameProfile profile = player.getGameProfile();
 
-		if (profile.getId().equals(getPlayerId())) {
+		if (profile.id().equals(getPlayerId())) {
 			long duration = Math.round(Math.ceil(Math.log(xpChange + 0.5)));
 
 			LOGGER.debug("XP CHANGE: " + xpChange);
@@ -318,8 +316,8 @@ public class ClientEventHandler {
 
 	public static UUID getPlayerId() {
 		@SuppressWarnings("resource")
-		ClientPlayerEntity player = MinecraftClient.getInstance().player;
+		LocalPlayer player = Minecraft.getInstance().player;
 
-		return player == null ? null : player.getUuid();
+		return player == null ? null : player.getUUID();
 	}
 }

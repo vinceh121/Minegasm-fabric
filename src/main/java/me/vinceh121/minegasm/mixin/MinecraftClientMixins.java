@@ -7,14 +7,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.therainbowville.minegasm.client.ClientEventHandler;
 
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
-@Mixin(MinecraftClient.class)
+@Mixin(Minecraft.class)
 public class MinecraftClientMixins {
 	@Inject(at = @At("TAIL"), method = "tick()V")
 	private void onTickEnd(CallbackInfo ci) {
 		@SuppressWarnings("resource")
-		MinecraftClient thos = (MinecraftClient) (Object) this;
+		Minecraft thos = (Minecraft) (Object) this;
 
 		ClientEventHandler.onClientTick();
 
